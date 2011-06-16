@@ -199,8 +199,7 @@ namespace Snowcode.S3BuildPublisher.S3
 
             if (!string.IsNullOrEmpty(metaData))
             {
-//                request.WithMetaData(HttpUtility.ParseQueryString(metaData));
-                request.WithMetaData("Content-Encoding", "gzip");
+                request.WithMetaData(HttpUtility.ParseQueryString(metaData));
             }
 
             Client.PutObject(request);
