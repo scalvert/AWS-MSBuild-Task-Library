@@ -38,7 +38,7 @@ namespace Snowcode.S3BuildPublisher.S3
         /// <summary>
         /// Gets or sets a list of metadata, in the form of a querystring
         /// </summary>
-        public string MetaData { get; set; }
+        public bool UseGzip { get; set; }
 
         #endregion
 
@@ -108,7 +108,7 @@ namespace Snowcode.S3BuildPublisher.S3
         {
             using (var helper = new S3Helper(clientDetails))
             {
-                helper.Publish(SourceFiles, DestinationBucket, DestinationFolder, PublicRead, MetaData);
+                helper.Publish(SourceFiles, DestinationBucket, DestinationFolder, PublicRead, UseGzip);
                 Log.LogMessage(MessageImportance.Normal, "Published {0} files to S3", SourceFiles.Length);
             }
         }

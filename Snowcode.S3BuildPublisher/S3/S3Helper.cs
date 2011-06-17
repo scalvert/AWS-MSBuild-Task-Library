@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Web;
 using Amazon;
 using Amazon.S3.Util;
 using Amazon.S3.Model;
@@ -61,14 +58,14 @@ namespace Snowcode.S3BuildPublisher.S3
         /// <param name="bucketName"></param>
         /// <param name="folder"></param>
         /// <param name="publicRead"></param>
-        /// <param name="metaData"></param>
-        public void Publish(string[] files, string bucketName, string folder, bool publicRead, string metaData = null)
+        /// <param name="useGzip"></param>
+        public void Publish(string[] files, string bucketName, string folder, bool publicRead, bool useGzip)
         {
             CreateBucketIfNeeded(bucketName);
 
             string destinationFolder = GetDestinationFolder(folder);
 
-            StoreFiles(files, bucketName, destinationFolder, publicRead, metaData);
+            StoreFiles(files, bucketName, destinationFolder, publicRead, useGzip);
         }
 
         /// <summary>
@@ -163,13 +160,13 @@ namespace Snowcode.S3BuildPublisher.S3
             }
         }
 
-        private void StoreFiles(string[] files, string bucketName, string destinationFolder, bool publicRead, string metaData)
+        private void StoreFiles(string[] files, string bucketName, string destinationFolder, bool publicRead, bool useGzip)
         {
             foreach (string file in files)
             {
                 // Use the filename as the key (aws filename).
                 string key = Path.GetFileName(file);
-                StoreFile(file, destinationFolder + key, bucketName, publicRead, metaData);
+                StoreFile(file, destinationFolder + key, bucketName, publicRead, useGzip);
             }
         }
 
@@ -186,7 +183,7 @@ namespace Snowcode.S3BuildPublisher.S3
             return destinationFolder;
         }
 
-        private void StoreFile(string file, string key, string bucketName, bool publicRead, string metaData)
+        private void StoreFile(string file, string key, string bucketName, bool publicRead, bool useGzip)
         {
             S3CannedACL acl = publicRead ? S3CannedACL.PublicRead : S3CannedACL.Private;
 
@@ -197,9 +194,9 @@ namespace Snowcode.S3BuildPublisher.S3
                 .WithBucketName(bucketName)
                 .WithKey(key);
 
-            if (!string.IsNullOrEmpty(metaData))
+            if (useGzip)
             {
-                request.WithMetaData(HttpUtility.ParseQueryString(metaData));
+                request.AddHeader("Content-Encoding", "gzip");
             }
 
             Client.PutObject(request);
